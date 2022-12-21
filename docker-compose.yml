@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  dns:
+    image: 'tschaffter/dnsmasq'
+    restart: always
+    networks:
+      mitm_internal:
+        ipv4_address: 172.201.0.53
+    volumes:
+      - './dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf'
+  mitmproxy:
+    image: 'mitmproxy/mitmproxy'
+    restart: always
+    entrypoint: mitmweb
+    command: '--web-host 0.0.0.0 -m regular@80 -m regular@443'
+    networks:
+      mitm_internal:
+        ipv4_address: 172.201.0.80
+      mitm_external:
+        ipv4_address: 172.202.0.80
+    ports:
+      - '8080:80/tcp'
+      - '8443:443/tcp'
+      - '8081:8081/tcp'
+    volumes:
+      - './cert:/root/.mitmproxy'
+  debugee:
+    image: ${DEBUGEE_IMAGE_PATCHED}
+    dns: 172.201.0.53
+    networks:
+      mitm_internal:
+        ipv4_address: 172.201.0.99
+
+networks:
+  mitm_internal:
+    name: mitm_internal
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.201.0.0/16
+          gateway: 172.201.0.1
+  mitm_external:
+    name: mitm_external
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.202.0.0/16
+          gateway: 172.202.0.1

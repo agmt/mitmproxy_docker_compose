@@ -6,7 +6,7 @@ services:
     restart: always
     networks:
       mitm_internal:
-        ipv4_address: 172.201.0.53
+        ipv4_address: 172.31.254.53
     volumes:
       - './dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf'
   mitmproxy:
@@ -16,9 +16,9 @@ services:
     command: '--web-host 0.0.0.0 -m regular@80 -m regular@443'
     networks:
       mitm_internal:
-        ipv4_address: 172.201.0.80
+        ipv4_address: 172.31.254.80
       mitm_external:
-        ipv4_address: 172.202.0.80
+        ipv4_address: 172.31.255.80
     ports:
       - '8080:80/tcp'
       - '8443:443/tcp'
@@ -27,10 +27,10 @@ services:
       - './cert:/root/.mitmproxy'
   debugee:
     image: ${DEBUGEE_IMAGE_PATCHED}
-    dns: 172.201.0.53
+    dns: 172.31.254.53
     networks:
       mitm_internal:
-        ipv4_address: 172.201.0.99
+        ipv4_address: 172.31.254.99
 
 networks:
   mitm_internal:
@@ -39,12 +39,12 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.201.0.0/16
-          gateway: 172.201.0.1
+        - subnet: 172.31.254.0/24
+          gateway: 172.31.254.1
   mitm_external:
     name: mitm_external
     ipam:
       driver: default
       config:
-        - subnet: 172.202.0.0/16
-          gateway: 172.202.0.1
+        - subnet: 172.31.255.0/24
+          gateway: 172.31.255.1

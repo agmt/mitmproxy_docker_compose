@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   dns:
     image: 'tschaffter/dnsmasq'
@@ -27,7 +25,11 @@ services:
       - './cert:/root/.mitmproxy'
   debugee:
     image: ${DEBUGEE_IMAGE_PATCHED}
+    command: ${DEBUGEE_COMMAND}
     dns: 172.31.254.53
+    depends_on:
+      - dns
+      - mitmproxy
     networks:
       mitm_internal:
         ipv4_address: 172.31.254.99
